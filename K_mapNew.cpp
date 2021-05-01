@@ -82,13 +82,13 @@ int main()
     }
 
     //one_num=minterm number
-struct minterm *cur_ptr=new struct minterm[one_num];
+struct minterm *cur_ptr=new struct minterm[one_num*3];
     //status reset
     /*
     for(int i=0;i<one_num;i++)
     {   cur_ptr[i].status=(-1);}
     */
-struct minterm *new_ptr=new struct minterm[one_num];//比較完 存現有值
+struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     //status reset
     /*
     for(int i=0;i<one_num;i++)
@@ -206,32 +206,8 @@ struct minterm *new_ptr=new struct minterm[one_num];//比較完 存現有值
     struct minterm * temp_swap=NULL;
 
     
-    //test
-    useful_size=one_num;
-    Sim_loop(useful,useless,useful_size);
-        //swap
-        temp_swap=useful;
-        useful=useless;
-        useless=temp_swap;
-    Sim_loop(useful,useless,useful_size);
-        //swap
-        temp_swap=useful;
-        useful=useless;
-        useless=temp_swap;
-    Sim_loop(useful,useless,useful_size);
-        //swap
-        temp_swap=useful;
-        useful=useless;
-        useless=temp_swap;    
-    Sim_loop(useful,useless,useful_size);
-        //swap
-        temp_swap=useful;
-        useful=useless;
-        useless=temp_swap;
+   
 
-
-
-    /*
     useful_size=one_num;
     while(1)
     {
@@ -245,8 +221,20 @@ struct minterm *new_ptr=new struct minterm[one_num];//比較完 存現有值
             break;
         }
     }
-    //break useful指道就是我們要的
-    */
+    //!!!!!!!!!!!!!!!!目前useful 指到就是化簡完成的 但是還有重複的
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
     delete [] cur_ptr;
@@ -428,7 +416,7 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
 {                             //cur                     new           useful_size
 
     int new_ind=0;
-    useless_size=num_one;
+    useless_size=num_one;//這次傳入的useful_size是下次的useless_size
     for(int i=0;i<(num_one-1);i++)
     {
         for(int j=i+1;j<num_one;j++)
@@ -460,17 +448,18 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
     }
     
 
-    for(int i=0;i<one_num;i++)//check status
+    for(int i=0;i<num_one;i++)//check status
     {   if(to_change[i].status==(-1))
-        {   to_create[useful_size].binary[0]=to_change[i].binary[0];
-            to_create[useful_size].binary[1]=to_change[i].binary[1];
-            to_create[useful_size].binary[2]=to_change[i].binary[2];
-            to_create[useful_size].binary[3]=to_change[i].binary[3];
+        {   to_create[new_ind].binary[0]=to_change[i].binary[0];
+            to_create[new_ind].binary[1]=to_change[i].binary[1];
+            to_create[new_ind].binary[2]=to_change[i].binary[2];
+            to_create[new_ind].binary[3]=to_change[i].binary[3];
             new_ind++;
         }
     }
 
     //for testing use
+    
     for(int i=0;i<num_one;i++)
     {   
         cout<<to_change[i].binary[0]<<to_change[i].binary[1]<<to_change[i].binary[2]<<to_change[i].binary[3]<<' '
@@ -482,12 +471,12 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
     {   cout<<to_create[i].binary[0]<<to_create[i].binary[1]<<to_create[i].binary[2]<<to_create[i].binary[3]<<' '
         <<"(status "<<to_create[i].status<<" )";}
     cout<<endl;
-
+    
 
     //status reset
-    for(int i=0;i<useful_size;i++)
+    for(int i=0;i<one_num;i++)
     {   to_change[i].status=(-1);}
-    for(int i=0;i<useful_size;i++)
+    for(int i=0;i<one_num;i++)
     {   to_create[i].status=(-1);}
     
 
@@ -495,16 +484,17 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
 
 
     useful_size=new_ind;
-
-    
-
-    
-    //new_ind 是正確element的index +1
-    //取正確的值只取長度為new_ind的(捨去最後一個)
 }
+
+    
+
+    
+
 
 
 bool minterm_comparer(struct minterm *a,struct minterm *b,int a_size,int b_size)
+//                              use_ful          use_less useful_size useless_size
+//第一次                                                 第一次完new_ind    one_num
 {
     if(a_size!=b_size)
     {   return false;}
