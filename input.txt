@@ -1,1 +1,1 @@
-a'c'+(b'c)+ab
+ad+a'bc+c'd+(a'b'cd)+(ab'cd')
