@@ -327,9 +327,9 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         
         }
         */
-    
-
-
+    enum implicant_name {   p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15};
+    //p0=0  p1=1   p2=2.........................p15=15
+    //用於prime_implicant的index
 
     if(!(cover_once.empty()))//有essential(內非空)
     {  
@@ -365,10 +365,152 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         //test
 
 
-
+    //沒有essential 或有essential都可以
     //prime table不為零的index為尚未cover的minterm
+    vector<int> uncover_min;
+    
+    for (int i = 0; i < 16; i++)
+    {
+        if(prime_table[i]!=0)
+        {   uncover_min.push_back(i);}
+    }
+
+    vector<int> patriks_term [16];
+    //最多 uncover_min.size()個 有值
+
+
+
+
+    //uncover_min 存有所有uncover的minterm
+    for (int i = 0; i <uncover_min.size(); i++)//uncover_min traverse(橫)
+    {
+        for(int j=0;j <prime_implicant.size(); j++)//prime implicant traverse(直)
+        {   
+            for(int n=0;n <prime_implicant[j].decimal_vec.size();n++)//decimal vector traverse
+            {
+                if(prime_implicant[j].decimal_vec[n]==uncover_min[i])
+                {   patriks_term[i].push_back(j);}
+            }
+        }
+    }
+    //重要的是找到哪幾個prime implicant 集合再一起
+    //patricks_term內現有 uncover_min.size()個 "sum term" 要相乘
+    //每個sum 有patriks_term[i].size()個 implicant
+    //cout<<patriks_term[0].size()<<endl;
+    //cout<<patriks_term[1].size()<<endl;
+    int product_num=1;
+    for (int i = 0; i < uncover_min.size(); i++)
+    {
+        product_num=product_num*patriks_term[i].size();
+    }
+    
+    vector<int> product_list [100];//所有可能的product term
+    product_list->clear();//陣列一定要清乾淨
+    product_list->resize(product_num);
+    for (int i = 0; i < product_num; i++)//陣列一定要清乾淨不然裡面會有垃圾
+    {
+        product_list[i].clear();
+    }
+    
 
     
+    for(int sum_ind=0;sum_ind< uncover_min.size();sum_ind++)//有幾個() 相乘在一起
+    {   
+        int product_ind=0;
+        while(!(product_ind>=product_num))//相等才BREAK
+        {   
+            for(int i=0;i< patriks_term[sum_ind].size();i++)
+            {    
+                product_list[product_ind].push_back(patriks_term[sum_ind][i]);
+                product_ind++;//index
+            }
+        }
+        
+    }
+    //test
+    /*
+        cout<<endl;
+        for(int i=0;i<product_list[0].size();i++)
+        {   cout<<product_list[0][i];}
+        cout<<endl;
+        for(int i=0;i<product_list[1].size();i++)
+        {   cout<<product_list[1][i];}
+        cout<<endl;
+        for(int i=0;i<product_list[2].size();i++)
+        {   cout<<product_list[2][i];}
+        cout<<endl;
+        for(int i=0;i<product_list[3].size();i++)
+        {   cout<<product_list[3][i];}
+        cout<<endl;
+    
+    
+    cout << product_list[0].size() << endl;
+    cout << product_list[1].size() << endl;
+    cout << product_list[2].size() << endl;
+    cout << product_list[3].size() << endl;
+    */
+    //test
+
+    
+    //bestcases
+    //每個product list 存的是包含的prime_implicant index(越少越好)
+    int shortest=1000;
+    vector<int> p_num;//每個term 裡有幾個implicant
+    p_num.clear();
+    for (int i = 0; i < product_num; i++)
+    {
+        
+        int total=1;
+        for(int j=1;j<product_list[i].size();j++)
+        {   
+            //j=1 n=0
+            //j=2 n=0,1
+            int unique=1;
+            
+            for (int n = 0; n < j; n++)
+            {
+                if(product_list[i][n]==product_list[i][j])
+                {unique=unique*0;}
+            
+            }
+            if(unique)
+            total++;
+            p_num.push_back(total);
+            //p_num 的index 對應到product_list的index
+        }
+        //這邊total已經是此product的different term數量
+        if(total<shortest)
+        shortest=total;
+    }
+    //test
+    //cout<<"shortest"<<shortest;
+    //cout<<p_num[0]<<endl<<p_num[1]<<endl<<p_num[2]<<endl<<p_num[3]<<endl<<p_num[4]<<endl;
+    
+    //有幾項shortest term
+    int num_of_shortest=0;
+    vector<int> shortest_index;
+    shortest_index.clear();
+    for (int i = 0; i < product_num ; i++)
+    {
+        p_num[i]==shortest;
+        shortest_index.push_back(i);
+        num_of_shortest++;
+    }
+
+    vector<int> essential2 [10];
+    essential2->resize(num_of_shortest);
+    for (int i = 0; i < num_of_shortest; i++)//陣列一定要清乾淨不然裡面會有垃圾
+    {
+        product_list[i].clear();
+    }
+    //num_of_shortest 表所有要取(直的數量)
+    //shortest_index 表要存的product_list index !!!!!!!(但可能會有重複的) 
+    
+    
+
+
+
+
 
 
     delete [] cur_ptr;
