@@ -21,7 +21,11 @@ struct minterm
 {
     int binary[4];
     int status=(-1);
+    vector<int> decimal_vec;//用vector size即可
 };
+
+
+
 
 //*************************
 
@@ -200,12 +204,21 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
             }
         }
     }
-   //cur_ptr[one_number]裡面已經建立完所有patern 的binary數值
+    //cur_ptr[one_number]裡面已經建立完所有patern 的binary數值
+
+    //initialize decimal num
+    for(int i=0;i<one_num;i++)
+    {   
+        int decimal=0;
+        decimal=cur_ptr[i].binary[0]*8+cur_ptr[i].binary[1]*4+cur_ptr[i].binary[2]*2+cur_ptr[i].binary[3]*1;
+        cur_ptr[i].decimal_vec.push_back(decimal);
+    }
+
+
     struct minterm * useful=cur_ptr;
     struct minterm * useless=new_ptr;
     struct minterm * temp_swap=NULL;
 
-    
    
 
     useful_size=one_num;
@@ -221,18 +234,139 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
             break;
         }
     }
-    //!!!!!!!!!!!!!!!!目前useful 指到就是化簡完成的 但是還有重複的
+    //!!!!!!!!!!!!!!!!目前useful  與useful_size 指到就是化簡完成的 但是還有重複的
+    
+    //test
+    for(int i=0;i<useful_size;i++)
+    {   
+        cout<<"number"<<i<<" is ";
+        for(int j=0;j<useful[i].decimal_vec.size();j++)
+        {   cout<<useful[i].decimal_vec[j]<<"  ";}
+        cout<<endl;
+    }
+
+
+    //把重複搞掉
+    vector<int> index_needed;
+    index_needed.push_back(0);//0一定是必要的index
+    for(int i=1;i<useful_size;i++)
+    {
+        int judge=0;
+        for(int j=0;j<i;j++)
+        {
+            if(!(useful[i].binary[0]==useful[j].binary[0]&&
+            useful[i].binary[1]==useful[j].binary[1]&&
+            useful[i].binary[2]==useful[j].binary[2]&&
+            useful[i].binary[3]==useful[j].binary[3]))
+            {   judge++;}                 
+        }
+        if(judge==i)
+        {   index_needed.push_back(i);}
+    }
+    //index 存著所有prime implicant 的index 沒有重複數值了!!!!!!!!!!!!!!!!!!!!!
+    
+
+
+        //testing index_needed***************************************************************
+        /*
+        for(int i=0;i<index_needed.size();i++)
+        {
+        cout<<useful[index_needed[i]].binary[0]<<useful[index_needed[i]].binary[1]
+        <<useful[index_needed[i]].binary[2]<<useful[index_needed[i]].binary[3];
+
+        for(int j=0;j<useful[index_needed[i]].decimal_vec.size();j++)
+        {      
+            cout<<useful[index_needed[i]].decimal_vec[j]<<" ";
+        }
+        cout<<endl;
+        }
+        */
+        //testing index_needed***************************************************************
+    
+    //finding essential prime implicants
+    vector<int> prime_table(16,0);
+
+    for(int i=0;i<index_needed.size();i++)
+    {
+        for(int j=0;j<useful[index_needed[i]].decimal_vec.size();j++)
+        prime_table[useful[index_needed[i]].decimal_vec[j]]++;
+    }
+
+    //test
+    
+    for (int i = 0; i <16; i++)
+    {
+        cout<<i<<" "<<prime_table[i]<<endl;
+    }
+    
+    //test
+    vector<int> cover_once;//存只有essential 會有cover的值
+    cover_once.clear();
+    for (int i = 0; i <16; i++)
+    {
+        if(prime_table[i]==1)//哪個index 只有被cover once
+        {   
+            cover_once.push_back(i);//i 是只有essential 有cover的值
+        }
+    }
+    
+    
+    vector<struct minterm> prime_implicant(index_needed.size());
+    
+    for (int i = 0; i < index_needed.size(); i++)
+    {
+        prime_implicant[i]=useful[index_needed[i]];
+    }
+    
+        /*testing
+        cout<<prime_implicant.size()<<index_needed.size()<<endl;
+        for (int i = 0; i < prime_implicant.size(); i++)
+        {
+        cout<<prime_implicant[i].binary[0]<<prime_implicant[i].binary[1]
+        <<prime_implicant[i].binary[2]<<prime_implicant[i].binary[3]<<endl;
+        
+        }
+        */
+    
 
 
 
+    if(!(cover_once.empty()))//有essential(內非空)
+    {  
+        int once_ind=0;
+        for (int i = 0; i < prime_implicant.size(); i++)
+        {
+            int yesno=0;
+            for(int j=0;j<prime_implicant[i].decimal_vec.size();j++)
+            {
+                if(prime_implicant[i].decimal_vec[j]==cover_once[once_ind])
+                {   yesno++;}
+            }
+            if(yesno!=0)//表prime_implicant[i]是essential
+            {   
+                for(int n=0;n<prime_implicant[i].decimal_vec.size();n++)
+                prime_table[prime_implicant[i].decimal_vec[n]]=0;
+                once_ind++;
+            }
+            yesno=0;
+            if(once_ind==cover_once.size())
+            {   break;}
+        }
+        
+    }
+
+        //test
+        /*
+        for (int i = 0; i <16; i++)
+        {
+        cout<<i<<" "<<prime_table[i]<<endl;
+        }
+        */
+        //test
 
 
 
-
-
-
-
-
+    //prime table不為零的index為尚未cover的minterm
 
     
 
@@ -439,8 +573,19 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
                 {   
                     to_change[i].status=1;
                     to_change[j].status=1;
-                    new_ind++;
+                    //只有merge 成功的才要改decimal**********************************************************
+                    to_create[new_ind].decimal_vec.clear();
+                    for(int a=0;a<to_change[i].decimal_vec.size();a++)
+                    {   
+                        to_create[new_ind].decimal_vec.push_back(to_change[i].decimal_vec[a]);
+                    }
+                    for(int b=0;b<to_change[j].decimal_vec.size();b++)
+                    {   
+                        to_create[new_ind].decimal_vec.push_back(to_change[j].decimal_vec[b]);
+                    }
+                    //以上改decimal**********************************************************
                     
+                    new_ind++;
                 }
                 
             }
@@ -454,6 +599,10 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
             to_create[new_ind].binary[1]=to_change[i].binary[1];
             to_create[new_ind].binary[2]=to_change[i].binary[2];
             to_create[new_ind].binary[3]=to_change[i].binary[3];
+            //decimal
+            to_create[new_ind].decimal_vec.clear();
+            to_create[new_ind].decimal_vec.assign(to_change[i].decimal_vec.begin(), to_change[i].decimal_vec.end()); 
+
             new_ind++;
         }
     }
@@ -462,14 +611,29 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
     
     for(int i=0;i<num_one;i++)
     {   
-        cout<<to_change[i].binary[0]<<to_change[i].binary[1]<<to_change[i].binary[2]<<to_change[i].binary[3]<<' '
-        <<"(status "<<to_change[i].status<<" )";
+        cout<<to_change[i].binary[0]<<to_change[i].binary[1]<<to_change[i].binary[2]<<to_change[i].binary[3]<<"->";
+        
+
+        cout<<to_change[i].decimal_vec.size()<<':';
+        for(int j=0;j<to_change[i].decimal_vec.size();j++)
+        {      
+            cout<<to_change[i].decimal_vec[j]<<" ";
+        }
+    
     }
     cout<<endl;
 
     for(int i=0;i<new_ind;i++)
-    {   cout<<to_create[i].binary[0]<<to_create[i].binary[1]<<to_create[i].binary[2]<<to_create[i].binary[3]<<' '
-        <<"(status "<<to_create[i].status<<" )";}
+    {   cout<<to_create[i].binary[0]<<to_create[i].binary[1]<<to_create[i].binary[2]<<to_create[i].binary[3]<<"->";
+        
+        cout<<to_create[i].decimal_vec.size()<<':';
+        for(int j=0;j<to_create[i].decimal_vec.size();j++)
+        {      
+            cout<<to_create[i].decimal_vec[j]<<" ";
+        }
+    
+    
+    }
     cout<<endl;
     
 
@@ -520,67 +684,3 @@ bool minterm_comparer(struct minterm *a,struct minterm *b,int a_size,int b_size)
 
 
 
-//**********************************queen macusky simplification************************************************************
-    
-    /*
-    int new_ind=0;
-    for(int i=0;i<(one_num-1);i++)
-    {
-        for(int j=i+1;j<one_num;j++)
-        {
-            int differ=0;
-            for(int ind=0;ind<4;ind++)//differ是一組ind(0123)共用的值
-            {
-                
-                if(cur_ptr[i].binary[ind]==cur_ptr[j].binary[ind])
-                {   
-                    new_ptr[new_ind].binary[ind]=cur_ptr[i].binary[ind];
-                }
-                else if(cur_ptr[i].binary[ind]!=cur_ptr[j].binary[ind])//不一樣就改(-1)不論幾個
-                {
-                    new_ptr[new_ind].binary[ind]=(-1);
-                    differ++;
-                }
-
-                if((ind==3)&&(differ==1))//ij merge successfully (if failed ,new_ind沒++ 下一輪會把不要的洗掉)
-                {   
-                    cur_ptr[i].status=1;
-                    cur_ptr[j].status=1;
-                    new_ind++;
-                    
-                }
-                
-            }
-        }
-    }
-    
-
-    for(int i=0;i<one_num;i++)//check status
-    {   if(cur_ptr[i].status==(-1))
-        {   new_ptr[new_ind].binary[0]=cur_ptr[i].binary[0];
-            new_ptr[new_ind].binary[1]=cur_ptr[i].binary[1];
-            new_ptr[new_ind].binary[2]=cur_ptr[i].binary[2];
-            new_ptr[new_ind].binary[3]=cur_ptr[i].binary[3];
-            new_ind++;
-        }
-    }
-
-    //status reset
-    for(int i=0;i<one_num;i++)
-    {   cur_ptr[i].status=(-1);}
-    for(int i=0;i<one_num;i++)
-    {   new_ptr[i].status=(-1);}
-    //status reset
-
-
-    
-    */
-    
-    
-    //new_ind 是正確element的index +1
-    //取正確的值只取長度為new_ind的(捨去最後一個)
-    
-
-    
-        
-//******************************************************************************
