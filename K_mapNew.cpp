@@ -24,14 +24,11 @@ struct minterm
     vector<int> decimal_vec;//用vector size即可
 };
 
-
-
-
 //*************************
 
 int K_MAP[4][4]={0};//initialize all 0
 
-
+void alpha_print(struct minterm );
 
 int main()
 {   
@@ -293,13 +290,13 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     }
 
     //test
-    
     for (int i = 0; i <16; i++)
     {
         cout<<i<<" "<<prime_table[i]<<endl;
     }
-    
     //test
+
+
     vector<int> cover_once;//存只有essential 會有cover的值
     cover_once.clear();
     for (int i = 0; i <16; i++)
@@ -310,7 +307,7 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         }
     }
     
-    
+    //左邊側欄的所有P
     vector<struct minterm> prime_implicant(index_needed.size());
     
     for (int i = 0; i < index_needed.size(); i++)
@@ -327,9 +324,11 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         
         }
         */
-    enum implicant_name {   p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15};
-    //p0=0  p1=1   p2=2.........................p15=15
-    //用於prime_implicant的index
+    
+
+
+    vector<int> essential_index;
+
 
     if(!(cover_once.empty()))//有essential(內非空)
     {  
@@ -342,8 +341,9 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
                 if(prime_implicant[i].decimal_vec[j]==cover_once[once_ind])
                 {   yesno++;}
             }
-            if(yesno!=0)//表prime_implicant[i]是essential
+            if(yesno!=0)//表prime_implicant[i]是essential!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             {   
+                essential_index.push_back(i);
                 for(int n=0;n<prime_implicant[i].decimal_vec.size();n++)
                 prime_table[prime_implicant[i].decimal_vec[n]]=0;
                 once_ind++;
@@ -353,15 +353,19 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
             {   break;}
         }
         
+        //test
+        //cout<<"essential_index"<<essential_index[0]<<"  "<<essential_index[1]<<endl;
+
+
     }
 
         //test
-        /*
+        
         for (int i = 0; i <16; i++)
         {
         cout<<i<<" "<<prime_table[i]<<endl;
         }
-        */
+        
         //test
 
 
@@ -378,8 +382,11 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     vector<int> patriks_term [16];
     //最多 uncover_min.size()個 有值
 
-
-
+    for (int i = 0; i < 16; i++)
+    {
+        patriks_term [i].clear();
+    }
+    
 
     //uncover_min 存有所有uncover的minterm
     for (int i = 0; i <uncover_min.size(); i++)//uncover_min traverse(橫)
@@ -396,24 +403,27 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     //重要的是找到哪幾個prime implicant 集合再一起
     //patricks_term內現有 uncover_min.size()個 "sum term" 要相乘
     //每個sum 有patriks_term[i].size()個 implicant
-    //cout<<patriks_term[0].size()<<endl;
-    //cout<<patriks_term[1].size()<<endl;
+    cout<<"test";
+    cout<<patriks_term[0].size()<<endl;
+    cout<<patriks_term[1].size()<<endl;
     int product_num=1;
     for (int i = 0; i < uncover_min.size(); i++)
     {
         product_num=product_num*patriks_term[i].size();
     }
     
-    vector<int> product_list [100];//所有可能的product term
-    product_list->clear();//陣列一定要清乾淨
-    product_list->resize(product_num);
+    vector<int> product_list [5000];//所有可能的product term
+    //陣列一定要清乾淨
+    //product_list->resize(product_num);
+    product_list->clear();
+    /*
     for (int i = 0; i < product_num; i++)//陣列一定要清乾淨不然裡面會有垃圾
     {
         product_list[i].clear();
-    }
-    
-
-    
+    }*/
+    //如果每個product不同長會自動補零號(補在前面)
+    //cout<<"product_list [0][0]"<<product_list [0][0]<<endl;
+    cout<<"uncover_min.size()"<<uncover_min.size()<<endl;
     for(int sum_ind=0;sum_ind< uncover_min.size();sum_ind++)//有幾個() 相乘在一起
     {   
         int product_ind=0;
@@ -428,7 +438,7 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         
     }
     //test
-    /*
+    
         cout<<endl;
         for(int i=0;i<product_list[0].size();i++)
         {   cout<<product_list[0][i];}
@@ -443,20 +453,117 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         {   cout<<product_list[3][i];}
         cout<<endl;
     
-    
+    //都會一樣長(會自動補零)
     cout << product_list[0].size() << endl;
     cout << product_list[1].size() << endl;
     cout << product_list[2].size() << endl;
     cout << product_list[3].size() << endl;
-    */
+    
     //test
 
     
+
+
+    //!!!!檢查過了
     //bestcases
     //每個product list 存的是包含的prime_implicant index(越少越好)
     int shortest=1000;
     vector<int> p_num;//每個term 裡有幾個implicant
     p_num.clear();
+    vector<int> counter(20,0);
+    for (int i = 0; i < product_num; i++)
+    {
+        int total=0;
+        for(int j=0;j<product_list[i].size();j++)
+        {   switch (product_list[i][j])
+            {
+                case 0:
+                counter[0]=1;
+                break;
+            case 1:
+                counter[1]=1;
+                break;
+            case 2:
+                counter[2]=1;
+                break;
+            case 3:
+                counter[3]=1;
+                break;
+            case 4:
+                counter[4]=1;
+                break;
+            case 5:
+                counter[5]=1;
+                break;
+            case 6:
+                counter[6]=1;
+                break;
+            case 7:
+                counter[7]=1;
+                break;
+            case 8:
+                counter[8]=1;
+                break;
+            case 9:
+                counter[9]=1;
+                break;
+            case 10:
+                counter[10]=1;
+                break;
+            case 11:
+                counter[11]=1;
+                break;
+            case 12:
+                counter[12]=1;
+                break;
+            case 13:
+                counter[13]=1;
+                break;
+            case 14:
+                counter[14]=1;
+                break;
+            case 15:
+                counter[15]=1;
+                break;
+            case 16:
+                counter[16]=1;
+                break;
+            case 17:
+                counter[17]=1;
+                break;
+            case 18:
+                counter[18]=1;
+                break;
+            case 19:
+                counter[19]=1;
+                break;
+            case 20:
+                counter[20]=1;
+                break;
+        
+            default:
+                break;
+            }
+        }
+        for(int i=0;i<20;i++)
+        {   
+            total=total+counter[i];
+        }
+        p_num.push_back(total);
+        if(i==0)
+        {   shortest=total;}
+        else
+        {   if(total<shortest)
+                shortest=total;        
+        }
+        for(int i=0;i<20;i++)
+        {   counter[i]=0;}
+    }
+    cout<<"shortest"<<shortest<<endl;
+    cout<<p_num[0]<<endl<<p_num[1]<<endl<<p_num[2]<<endl<<p_num[3]<<endl<<p_num[4]<<endl;
+    
+    
+    /*(舊版)
     for (int i = 0; i < product_num; i++)
     {
         
@@ -471,45 +578,194 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
             {
                 if(product_list[i][n]==product_list[i][j])
                 {unique=unique*0;}
-            
+                cout<<unique<<endl;
             }
             if(unique)
             total++;
-            p_num.push_back(total);
+            //p_num.push_back(total);
             //p_num 的index 對應到product_list的index
         }
+        p_num.push_back(total);
         //這邊total已經是此product的different term數量
         if(total<shortest)
         shortest=total;
     }
     //test
-    //cout<<"shortest"<<shortest;
-    //cout<<p_num[0]<<endl<<p_num[1]<<endl<<p_num[2]<<endl<<p_num[3]<<endl<<p_num[4]<<endl;
-    
+    cout<<"shortest"<<shortest<<endl;
+    cout<<p_num[0]<<endl<<p_num[1]<<endl<<p_num[2]<<endl<<p_num[13]<<endl<<p_num[24]<<endl;
+    */
+
+
+
+    //以下尚未debug
     //有幾項shortest term
     int num_of_shortest=0;
     vector<int> shortest_index;
     shortest_index.clear();
     for (int i = 0; i < product_num ; i++)
     {
-        p_num[i]==shortest;
+        if(p_num[i]==shortest)
+        {
         shortest_index.push_back(i);
         num_of_shortest++;
+        }
+    }
+    //test
+    //cout<<num_of_shortest<<endl;
+    //cout<<shortest_index[0]<<endl<<shortest_index[1]<<endl<<shortest_index[2]<<endl<<shortest_index[3]<<endl;
+    //******************************
+    //      (product_list)
+    //num_of_shortest 要取的數量
+    //shortest_index 要取的index (會有重複)
+    //******************************
+          
+    
+    //就找第一個當隨機解 product_list[shortest_index[0]];
+    //product_list[shortest_index[0]].size() 存各種index
+    //vector<struct minterm> prime_implicant(index_needed.size());
+    
+    
+    //struct minterm
+    //{   
+    //int binary[4];
+    //int status=(-1);
+    //vector<int> decimal_vec;//用vector size即可
+    //};
+    
+    //是否有essential
+    //vector<int> essential_index; 存有essential 的index
+
+    //if()//kmap 全滿
+    //{
+
+    //}
+
+    //else//kmap 沒有全滿(正常狀況)
+    //{
+    int group_num=1;
+    if(!(cover_once.empty()))//有essential(內非空)
+    {   
+        for (int i = 0; i < essential_index.size(); i++)
+        {
+            cout<<"group"<<group_num<<":[";
+            for (int j = 0; j < prime_implicant[essential_index[i]].decimal_vec.size(); j++)
+            {
+                cout<<prime_implicant[essential_index[i]].decimal_vec[j];
+                if(j==(prime_implicant[essential_index[i]].decimal_vec.size()-1))
+                cout<<"]"<<endl;
+                else
+                cout<<',';
+            }
+            cout<<"simplification of group"<<group_num<<"->";   
+            alpha_print(prime_implicant[essential_index[i]]);
+            cout<<endl;
+            group_num++;
+        }
+        
+        
+    }
+    
+
+    //essential 做完接 無essential
+    //product_list 是二維   product_list[shortest_index[0]][i]
+    //cout<<"product_list[shortest_index[0]].size()"<<product_list[shortest_index[0]].size()<<endl;
+    for(int i=0;i < product_list[shortest_index[0]].size();i++)
+    {   
+        cout<<"group"<<group_num<<":[";
+        for (int j = 0; j < prime_implicant[product_list[shortest_index[0]][i]].decimal_vec.size(); j++)
+            {
+                cout<<prime_implicant[product_list[shortest_index[0]][i]].decimal_vec[j];
+                if(j==(prime_implicant[product_list[shortest_index[0]][i]].decimal_vec.size()-1))
+                cout<<"]"<<endl;
+                else
+                cout<<',';
+            }
+        cout<<"simplification of group"<<group_num<<"->";   
+            alpha_print(prime_implicant[product_list[shortest_index[0]][i]]);
+            cout<<endl;
+            group_num++;
     }
 
-    vector<int> essential2 [10];
-    essential2->resize(num_of_shortest);
-    for (int i = 0; i < num_of_shortest; i++)//陣列一定要清乾淨不然裡面會有垃圾
+
+
+
+    //}
+    
+
+
+
+    //***********************找出所有最佳解方法******************************************************************
+    /*
+    //判斷相加相乘有沒有都一樣的(判斷重複)
+    //sum_multiply 第一格放sum 第二格放multiply
+    vector<int> sum_multiply [100] ;
+    sum_multiply->resize(product_num);//product list 的size
+    for (int i = 0; i < product_num; i++)//陣列一定要清乾淨不然裡面會有垃圾
     {
-        product_list[i].clear();
+        sum_multiply[i].clear();
     }
-    //num_of_shortest 表所有要取(直的數量)
-    //shortest_index 表要存的product_list index !!!!!!!(但可能會有重複的) 
+
+        //error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        /*
+        sum_multiply[shortest_index[0]]=0;//initial sum
+        sum_multiply[shortest_index[0]][1]=1;
+        sum_multiply[shortest_index[1]][0]=0;//initial sum
+        sum_multiply[shortest_index[1]][1]=1;
+
+        cout<<sum_multiply[shortest_index[0]][0]<<//initial sum
+        sum_multiply[shortest_index[0]][1]<<
+        sum_multiply[shortest_index[1]][0]<<//initial sum
+     sum_multiply[shortest_index[1]][1];
+        */
+    /*
+    for (int i = 0; i < num_of_shortest; i++)
+    {   
+        sum_multiply[shortest_index[i]].push_back(0);//initial sum
+        sum_multiply[shortest_index[i]].push_back(1);//initial mutiply [0,1]
+        for (int j = 0; j <product_list[shortest_index[i]].size() ; j++)
+        {
+            
+            sum_multiply[shortest_index[i]][0]=sum_multiply[shortest_index[i]][0]+product_list[shortest_index[i]][j];
+            sum_multiply[shortest_index[i]][1]=sum_multiply[shortest_index[i]][1]*product_list[shortest_index[i]][j];
+        }
+    }
+    */
+
+    //test
+    /*
+    for (int i = 0; i < shortest_index.size(); i++)
+    {
+        cout<<"index"<<shortest_index[i]<<"sum"<<sum_multiply[shortest_index[i]][0];
+        cout<<"index"<<shortest_index[i]<<"multiply"<<sum_multiply[shortest_index[i]][1];
+    }
+    */
+    //sum_multiply 裡面也只有其中幾個index有值(對應到product_list 的index)
+    //取值by shortest_index[i] 共有num_of_shortest 個
+
     
     
 
 
 
+
+
+
+
+
+
+
+
+        //最終的結果
+        /*
+         vector<int> essential2 [10];
+        essential2->resize(num_of_shortest);
+        for (int i = 0; i < num_of_shortest; i++)//陣列一定要清乾淨不然裡面會有垃圾
+        {
+        essential2[i].clear();
+        }
+        */
+    
+    //************************************************************************************
 
 
 
@@ -821,7 +1077,27 @@ bool minterm_comparer(struct minterm *a,struct minterm *b,int a_size,int b_size)
 }
 
 
+void alpha_print(struct minterm to_print )
+{ 
+    if(to_print.binary[0]==0)
+        cout<<"a'";
+    if(to_print.binary[0]==1)
+        cout<<"a";
+    if(to_print.binary[1]==0)
+        cout<<"b'";
+    if(to_print.binary[1]==1)
+        cout<<"b";
+    if(to_print.binary[2]==0)
+        cout<<"c'";
+    if(to_print.binary[2]==1)
+        cout<<"c";
+    if(to_print.binary[3]==0)
+        cout<<"d'";
+    if(to_print.binary[3]==1)
+        cout<<"d";
 
+    cout<<endl;
+}
 
 
 
