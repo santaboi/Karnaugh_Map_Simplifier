@@ -416,14 +416,16 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     //陣列一定要清乾淨
     //product_list->resize(product_num);
     product_list->clear();
-    /*
+    
     for (int i = 0; i < product_num; i++)//陣列一定要清乾淨不然裡面會有垃圾
     {
         product_list[i].clear();
-    }*/
+    }
     //如果每個product不同長會自動補零號(補在前面)
     //cout<<"product_list [0][0]"<<product_list [0][0]<<endl;
-    cout<<"uncover_min.size()"<<uncover_min.size()<<endl;
+    //*****************(old)此段patrick 爆開有點問題!!!!********************************************
+    /*
+    //cout<<"uncover_min.size()"<<uncover_min.size()<<endl;
     for(int sum_ind=0;sum_ind< uncover_min.size();sum_ind++)//有幾個() 相乘在一起
     {   
         int product_ind=0;
@@ -437,6 +439,66 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         }
         
     }
+    */
+    //*****************(old)此段patrick 爆開有點問題!!!!********************************************
+    //*****************(new)此段patrick 爆開有點問題!!!!********************************************
+
+    vector<int> pushed_times;
+    pushed_times.clear();
+    int temp;
+    for (int j = 0; j < (uncover_min.size()-1); j++) //size5 j 0123
+    {
+        temp=product_num;
+        for (int i = j; i <(uncover_min.size()-1) ; i++)//j=0 0123  j=1  123    j=2  23   j=3 3
+        {
+            temp=temp/(patriks_term[i].size());
+            pushed_times.push_back(temp);
+        }
+        
+    }
+    //pushed_times index 對應到patriks_term
+
+    //(new) product_list[][]的initialize
+    for (int i = 0; i < uncover_min.size(); i++)
+    {
+        int push_counter=0;
+        if(i==(uncover_min.size()-1))
+        {  
+            while (1)
+            {
+                for (int n = 0; n < patriks_term[i].size(); n++)
+                {
+                    product_list[push_counter].push_back(patriks_term[i][n]);
+                    push_counter++;
+                }
+                if(push_counter>=product_num) break;
+            }
+            
+            
+        }
+        else
+        {
+            while(1)
+            {
+                for (int j = 0; j < patriks_term[i].size(); j++)
+                {
+                    for (int m = 0; m < pushed_times[i]; m++)
+                    {
+                        product_list[push_counter].push_back(patriks_term[i][j]);
+                        push_counter++;
+                    }
+                    
+                }
+                if(push_counter>=product_num) break;
+            }
+        }
+    }
+    
+
+
+    //*****************(new)此段patrick 爆開有點問題!!!!********************************************
+
+
     //test
     
         cout<<endl;
@@ -454,10 +516,10 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         cout<<endl;
     
     //都會一樣長(會自動補零)
-    cout << product_list[0].size() << endl;
-    cout << product_list[1].size() << endl;
-    cout << product_list[2].size() << endl;
-    cout << product_list[3].size() << endl;
+    cout <<"product_list[0].size()"<< product_list[0].size() << endl;
+    cout <<  "product_list[1].size()"<<product_list[1].size() << endl;
+    cout << "product_list[2].size()"<< product_list[2].size() << endl;
+    cout <<  "product_list[3].size()"<<product_list[3].size() << endl;
     
     //test
 
