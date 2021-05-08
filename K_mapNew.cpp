@@ -234,6 +234,7 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     //!!!!!!!!!!!!!!!!目前useful  與useful_size 指到就是化簡完成的 但是還有重複的
     
     //test
+    /*
     for(int i=0;i<useful_size;i++)
     {   
         cout<<"number"<<i<<" is ";
@@ -241,7 +242,7 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         {   cout<<useful[i].decimal_vec[j]<<"  ";}
         cout<<endl;
     }
-
+    */
 
     //把重複搞掉
     vector<int> index_needed;
@@ -290,10 +291,12 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     }
 
     //test
+    /*
     for (int i = 0; i <16; i++)
     {
         cout<<i<<" "<<prime_table[i]<<endl;
     }
+    */
     //test
 
 
@@ -360,12 +363,12 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     }
 
         //test
-        
+        /*
         for (int i = 0; i <16; i++)
         {
         cout<<i<<" "<<prime_table[i]<<endl;
         }
-        
+        */
         //test
 
 
@@ -403,9 +406,14 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     //重要的是找到哪幾個prime implicant 集合再一起
     //patricks_term內現有 uncover_min.size()個 "sum term" 要相乘
     //每個sum 有patriks_term[i].size()個 implicant
+    //test
+    /*
     cout<<"test";
     cout<<patriks_term[0].size()<<endl;
     cout<<patriks_term[1].size()<<endl;
+    */
+    //test
+
     int product_num=1;
     for (int i = 0; i < uncover_min.size(); i++)
     {
@@ -441,7 +449,7 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     }
     */
     //*****************(old)此段patrick 爆開有點問題!!!!********************************************
-    //*****************(new)此段patrick 爆開有點問題!!!!********************************************
+    //*****************(new)此段patrick 爆開!!!!********************************************
 
     vector<int> pushed_times;
     pushed_times.clear();
@@ -496,11 +504,11 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     
 
 
-    //*****************(new)此段patrick 爆開有點問題!!!!********************************************
+    //*****************(new)此段patrick 爆開!!!!********************************************
 
 
     //test
-    
+    /*
         cout<<endl;
         for(int i=0;i<product_list[0].size();i++)
         {   cout<<product_list[0][i];}
@@ -520,7 +528,7 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     cout <<  "product_list[1].size()"<<product_list[1].size() << endl;
     cout << "product_list[2].size()"<< product_list[2].size() << endl;
     cout <<  "product_list[3].size()"<<product_list[3].size() << endl;
-    
+    */
     //test
 
     
@@ -621,9 +629,13 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
         for(int i=0;i<20;i++)
         {   counter[i]=0;}
     }
+    
+    //test
+    /*
     cout<<"shortest"<<shortest<<endl;
     cout<<p_num[0]<<endl<<p_num[1]<<endl<<p_num[2]<<endl<<p_num[3]<<endl<<p_num[4]<<endl;
-    
+    */
+   //test
     
     /*(舊版)
     for (int i = 0; i < product_num; i++)
@@ -705,7 +717,8 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     //else//kmap 沒有全滿(正常狀況)
     //{
     int group_num=1;
-    if(!(cover_once.empty()))//有essential(內非空)
+    //*****************************有essential(內非空)**********************************************
+    if(!(cover_once.empty()))
     {   
         for (int i = 0; i < essential_index.size(); i++)
         {
@@ -728,22 +741,65 @@ struct minterm *new_ptr=new struct minterm[one_num*3];//比較完 存現有值
     }
     
 
-    //essential 做完接 無essential
+    //**********************essential 做完接 無essential********************************************
+    cout<<" not essential"<<endl;
     //product_list 是二維   product_list[shortest_index[0]][i]
     //cout<<"product_list[shortest_index[0]].size()"<<product_list[shortest_index[0]].size()<<endl;
-    for(int i=0;i < product_list[shortest_index[0]].size();i++)
+    
+    
+
+    //尚未把重複的消掉! product_list[shortest_index[0]]
+    vector<int> not_essentail;
+    not_essentail.clear();
+    not_essentail.push_back(product_list[shortest_index[0]] [0]);
+    
+    for (int i = 1; i <product_list[shortest_index[0]].size() ; i++)
+    {
+        int pushOrNot=1;
+        for (int j = 0; j < i ; j++)
+        {
+            if(product_list[shortest_index[0]] [i]==product_list[shortest_index[0]] [j])
+            pushOrNot=0;
+        }
+        if (pushOrNot==1)
+        not_essentail.push_back(product_list[shortest_index[0]] [i]);
+        
+    }
+    
+
+    //test
+    /*
+    for (int i = 0; i < product_list[shortest_index[0]].size(); i++)
+    {
+        cout<<product_list[shortest_index[0]][i];
+    }
+    cout<<endl;
+    cout<<"not_essentail.size()"<<not_essentail.size()<<endl;
+    for (int i = 0; i < not_essentail.size(); i++)
+    {
+        cout<<not_essentail[i];
+    }
+    cout<<endl;
+    */
+    //test
+
+                
+
+
+
+    for(int i=0;i < not_essentail.size();i++)
     {   
         cout<<"group"<<group_num<<":[";
-        for (int j = 0; j < prime_implicant[product_list[shortest_index[0]][i]].decimal_vec.size(); j++)
+        for (int j = 0; j < prime_implicant[not_essentail[i]].decimal_vec.size(); j++)
             {
-                cout<<prime_implicant[product_list[shortest_index[0]][i]].decimal_vec[j];
-                if(j==(prime_implicant[product_list[shortest_index[0]][i]].decimal_vec.size()-1))
+                cout<<prime_implicant[not_essentail[i]].decimal_vec[j];
+                if(j==(prime_implicant[not_essentail[i]].decimal_vec.size()-1))
                 cout<<"]"<<endl;
                 else
                 cout<<',';
             }
         cout<<"simplification of group"<<group_num<<"->";   
-            alpha_print(prime_implicant[product_list[shortest_index[0]][i]]);
+            alpha_print(prime_implicant[not_essentail[i]]);
             cout<<endl;
             group_num++;
     }
@@ -1068,7 +1124,7 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
     }
 
     //for testing use
-    
+    /*
     for(int i=0;i<num_one;i++)
     {   
         cout<<to_change[i].binary[0]<<to_change[i].binary[1]<<to_change[i].binary[2]<<to_change[i].binary[3]<<"->";
@@ -1095,7 +1151,9 @@ void Sim_loop(struct minterm *to_change,struct minterm *to_create,int num_one)
     
     }
     cout<<endl;
-    
+    */
+    //for testing use
+
 
     //status reset
     for(int i=0;i<one_num;i++)
