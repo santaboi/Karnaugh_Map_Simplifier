@@ -2,7 +2,7 @@
 
 ## introduction:
 **(4bit,single output)function simplifier**
-**by Quine Mcclusky method&Patricks method to simplfy it**
+**by Quine Mcclusky method&Patricks method **
 
 ## sample input:
 **can enter any function with [+ * '()and abcd only]**
