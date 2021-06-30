@@ -5,7 +5,7 @@
 **by Quine Mcclusky method&Patricks method **
 
 ## sample input:
-**can enter any function with [+ * '()and abcd only]**
+**can enter any function with [+ * '()and abcd]only**
 
 ![](/S__548939.jpg)
 ## sample output:
