@@ -6,7 +6,11 @@
 
 ## sample input:
 **can enter any function with [+ * '()and abcd only] **
+
 ![](/S__548939.jpg)
 ## sample output:
-**output corresponding K_map and simplifying group**
+**the corresponding K_map** 
+**simplified group relationship**
+**optimized output function**
+
 ![](/S__548937.jpg)
